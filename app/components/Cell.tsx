@@ -16,19 +16,38 @@ const Cell: React.FC<CellProps> = ({ size, position }) => {
     const bluePath = "#0A07D9"; // Lighter blue for the path
     const redPath = "#E30E0E"; // Lighter red for the path
     const greenPath = "#4AD61C"; // Lighter green for the path
-    const center = "#1cd679"; // Center of the board
+    const center = "#1CD679"; // Center of the board
+    const safePoint = "#FFD700"; // Gold for safe points
+    const exitPoint = "#FF4500"; // Orange-red for exit points
 
     // Home areas
-    if (position.x > 8 && position.y > 8) return yellow; // Yellow
-    if (position.x < 6 && position.y < 6) return green; // Green
-    if (position.x < 6 && position.y > 8) return red; // Red
-    if (position.x > 8 && position.y < 6) return blue; // Blue
+    if (position.x > 8 && position.y > 8) return yellow; // Yellow home
+    if (position.x < 6 && position.y < 6) return green; // Green home
+    if (position.x < 6 && position.y > 8) return red; // Red home
+    if (position.x > 8 && position.y < 6) return blue; // Blue home
 
     // Path areas
-    if (position.x === 7 && position.y > 0 && position.y < 6) return greenPath; // Green path
-    if (position.y === 7 && position.x > 0 && position.x < 6) return redPath; // Red path
-    if (position.x === 7 && position.y > 8 && position.y < 14) return yellowPath; // Yellow path
-    if (position.y === 7 && position.x > 8 && position.x < 14) return bluePath; // Blue path
+    if (position.x === 7 && position.y > 0 && position.y < 7) return greenPath; // Green path
+    if (position.y === 7 && position.x > 0 && position.x < 7) return redPath; // Red path
+    if (position.x === 7 && position.y > 7 && position.y < 14) return yellowPath; // Yellow path
+    if (position.y === 7 && position.x > 7 && position.x < 14) return bluePath; // Blue path
+
+    // Exit points (first tile outside each home)
+    if ((position.x === 6 && position.y === 1)) return green; // Green exit
+    if ((position.x === 13 && position.y === 6)) return blue;// blue exit
+    if ( (position.x === 1 && position.y === 8)) return red; // Red exit
+    if ( (position.x === 8 && position.y === 13)) return yellow// yellow exit
+     
+
+    // Safe points (specific positions on paths)
+    if (
+      (position.x === 1 && position.y === 7) || // Safe on red path
+      (position.x === 7 && position.y === 1) || // Safe on green path
+      (position.x === 7 && position.y === 13) || // Safe on yellow path
+      (position.x === 13 && position.y === 7)   // Safe on blue path
+    ) {
+      return safePoint;
+    }
 
     // Center area (3x3 grid)
     if (position.x >= 6 && position.x <= 8 && position.y >= 6 && position.y <= 8) return center;
@@ -90,16 +109,15 @@ const Cell: React.FC<CellProps> = ({ size, position }) => {
 };
 
 const styles = StyleSheet.create({
-  cell: {
-    borderWidth: 0.5,
-    borderColor: "#000",
-  },
-  tokenHolder: {
-    backgroundColor: "#FFFFFF", // White token holders
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "center",
-  },
-});
-
+    cell: {
+      borderWidth: 0.5,
+      borderColor: "#000",
+    },
+    tokenHolder: {
+      backgroundColor: "#FFFFFF", // White token holders
+      justifyContent: "center",
+      alignItems: "center",
+      alignSelf: "center",
+    },
+  });
 export default Cell;
