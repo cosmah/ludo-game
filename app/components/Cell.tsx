@@ -32,12 +32,16 @@ const Cell: React.FC<CellProps> = ({ size, position }) => {
     if (position.x === 7 && position.y > 7 && position.y < 14) return yellowPath; // Yellow path
     if (position.y === 7 && position.x > 7 && position.x < 14) return bluePath; // Blue path
 
-    // Exit points (first tile outside each home)
+    // Exit pointsc (first tile outside each home)
     if ((position.x === 6 && position.y === 1)) return green; // Green exit
     if ((position.x === 13 && position.y === 6)) return blue;// blue exit
     if ( (position.x === 1 && position.y === 8)) return red; // Red exit
-    if ( (position.x === 8 && position.y === 13)) return yellow// yellow exit
-     
+    if ( (position.x === 8 && position.y === 13)) return yellow;// yellow exit
+    if ((position.x === 12 && position.y === 8)) return blue; // Blue exit
+    if ((position.x === 8 && position.y === 2)) return green; // Green exit
+    if ( (position.x === 2 && position.y === 6)) return red; // Red exit
+    if ( (position.x === 6 && position.y === 12)) return yellow;
+
 
     // Safe points (specific positions on paths)
     if (
@@ -82,7 +86,7 @@ const Cell: React.FC<CellProps> = ({ size, position }) => {
             {
               width: size * 1.0,
               height: size * 1.0,
-              borderRadius: size * 0.4,
+              borderRadius: size * 0.3,
             },
           ]}
         />
