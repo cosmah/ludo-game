@@ -12,12 +12,26 @@ const Cell: React.FC<CellProps> = ({ size, position }) => {
     const blue = "#0A07D9"; // Blue home
     const red = "#E30E0E"; // Red home
     const green = "#4AD61C"; // Green home
+    const yellowPath = "#FFFF05"; // Lighter yellow for the path
+    const bluePath = "#0A07D9"; // Lighter blue for the path
+    const redPath = "#E30E0E"; // Lighter red for the path
+    const greenPath = "#4AD61C"; // Lighter green for the path
+    const center = "#1cd679"; // Center of the board
 
     // Home areas
     if (position.x > 8 && position.y > 8) return yellow; // Yellow
     if (position.x < 6 && position.y < 6) return green; // Green
     if (position.x < 6 && position.y > 8) return red; // Red
     if (position.x > 8 && position.y < 6) return blue; // Blue
+
+    // Path areas
+    if (position.x === 7 && position.y > 0 && position.y < 6) return greenPath; // Green path
+    if (position.y === 7 && position.x > 0 && position.x < 6) return redPath; // Red path
+    if (position.x === 7 && position.y > 8 && position.y < 14) return yellowPath; // Yellow path
+    if (position.y === 7 && position.x > 8 && position.x < 14) return bluePath; // Blue path
+
+    // Center area (3x3 grid)
+    if (position.x >= 6 && position.x <= 8 && position.y >= 6 && position.y <= 8) return center;
 
     return "#FFFFFF"; // Default white
   };
