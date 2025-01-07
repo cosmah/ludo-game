@@ -1,22 +1,42 @@
-import React from 'react';
-import { View, Dimensions, StyleSheet } from 'react-native';
-import Cell from './Cell';
-import DiceRoller from './Dice';
+import React, { useState } from "react";
+import { View, Dimensions, StyleSheet } from "react-native";
+import Cell from "./Cell";
 
-const { width } = Dimensions.get('window');
-const BOARD_SIZE = width * 0.9; // The board occupies 90% of the screen width
-const CELL_SIZE = BOARD_SIZE / 15.31; // Each cell's size based on the board size
+const { width } = Dimensions.get("window");
+const BOARD_SIZE = width * 0.9;
+const CELL_SIZE = BOARD_SIZE / 15.31;
+
+interface TokenPosition {
+  x: number;
+  y: number;
+  color: string;
+}
 
 const Board = () => {
+  const [tokens, setTokens] = useState<TokenPosition[]>([
+    { x: 1, y: 1, color: "#4AD61C" },
+    { x: 4, y: 4, color: "#E30E0E" },
+    { x: 13, y: 1, color: "#0A07D9" },
+    { x: 13, y: 13, color: "#FFFF05" },
+  ]);
+
   const renderCells = () => {
     const cells = [];
-    for (let row = 0; row < 15; row++) { // Ensure exactly 15 rows
-      for (let col = 0; col < 15; col++) { // Ensure exactly 15 columns
+    for (let row = 0; row < 15; row++) {
+      for (let col = 0; col < 15; col++) {
+        const tokensInCell = tokens.filter(
+          (token) => token.x === row && token.y === col
+        );
+
         cells.push(
           <Cell
             key={`${row}-${col}`}
             size={CELL_SIZE}
-            position={{x: row, y: col}}//cell position
+            position={{ x: row, y: col }}
+            tokens={tokensInCell.map((token) => ({
+              color: token.color,
+              size: CELL_SIZE * 0.6,
+            }))}
           />
         );
       }
@@ -24,23 +44,19 @@ const Board = () => {
     return cells;
   };
 
-  return (
-    <View style={styles.board}>
-      {renderCells()}
-    </View>
-  );
+  return <View style={styles.board}>{renderCells()}</View>;
 };
 
 const styles = StyleSheet.create({
   board: {
     width: BOARD_SIZE,
     height: BOARD_SIZE,
-    backgroundColor: '#FFFFFF', // White background for the board
-    flexDirection: 'row',
-    flexWrap: 'wrap', // Ensures cells wrap correctly into rows
-    borderWidth: 3, // Thick border for the board
-    borderColor: '#000', // Black border for the board
-    borderRadius: 10, // Rounded corners for the board
+    backgroundColor: "#FFFFFF",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    borderWidth: 3,
+    borderColor: "#000",
+    borderRadius: 10,
   },
 });
 

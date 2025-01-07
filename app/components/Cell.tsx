@@ -4,9 +4,11 @@ import { View, StyleSheet } from "react-native";
 interface CellProps {
   size: number;
   position: { x: number; y: number };
+  tokens?: { color: string; size: number }[]; // Array of tokens in the cell
+  children?: React.ReactNode;
 }
 
-const Cell: React.FC<CellProps> = ({ size, position }) => {
+const Cell: React.FC<CellProps> = ({size, position, tokens, children}) => {
   const getCellColor = () => {
     const yellow = "#FFFF05"; // Yellow home
     const blue = "#0A07D9"; // Blue home
@@ -56,6 +58,9 @@ const Cell: React.FC<CellProps> = ({ size, position }) => {
     return "#FFFFFF"; // Default white
   };
 
+  
+
+
   const renderTokenHolders = () => {
     // Token holder placement logic
     const isTokenHolder = (x: number, y: number) =>
@@ -93,6 +98,28 @@ const Cell: React.FC<CellProps> = ({ size, position }) => {
     return null;
   };
 
+  const renderTokens = () => {
+    if (!tokens || tokens.length === 0) return null;
+
+    return tokens.map((token, index) => (
+      <View
+        key={index}
+        style={[
+          styles.token,
+          {
+            backgroundColor: token.color,
+            width: token.size,
+            height: token.size,
+            position: "absolute",
+            top: size / 4,
+            left: size / 4,
+          },
+        ]}
+      />
+    ));
+  };
+
+
   return (
     <View
       style={[
@@ -105,6 +132,21 @@ const Cell: React.FC<CellProps> = ({ size, position }) => {
       ]}
     >
       {renderTokenHolders()}
+    </View>
+  );
+  return (
+    <View
+      style={[
+        styles.cell,
+        {
+          width: size,
+          height: size,
+          backgroundColor: getCellColor(),
+        },
+      ]}
+    >
+      {renderTokenHolders()}
+      {children} {/* This will render the tokens */}
     </View>
   );
 };
