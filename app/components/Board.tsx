@@ -13,10 +13,30 @@ interface TokenPosition {
 }
 
 const Board = () => {
+  // Initial token positions for all four colors
   const [tokens, setTokens] = useState<TokenPosition[]>([
+    // Green tokens (top-left)
     { x: 1, y: 1, color: "#4AD61C" },
-    { x: 4, y: 4, color: "#E30E0E" },
+    { x: 1, y: 4, color: "#4AD61C" },
+    { x: 4, y: 1, color: "#4AD61C" },
+    { x: 4, y: 4, color: "#4AD61C" },
+    
+    // Red tokens (bottom-left)
+    { x: 1, y: 10, color: "#E30E0E" },
+    { x: 1, y: 13, color: "#E30E0E" },
+    { x: 4, y: 10, color: "#E30E0E" },
+    { x: 4, y: 13, color: "#E30E0E" },
+    
+    // Blue tokens (top-right)
+    { x: 10, y: 1, color: "#0A07D9" },
+    { x: 10, y: 4, color: "#0A07D9" },
     { x: 13, y: 1, color: "#0A07D9" },
+    { x: 13, y: 4, color: "#0A07D9" },
+    
+    // Yellow tokens (bottom-right)
+    { x: 10, y: 10, color: "#FFFF05" },
+    { x: 10, y: 13, color: "#FFFF05" },
+    { x: 13, y: 10, color: "#FFFF05" },
     { x: 13, y: 13, color: "#FFFF05" },
   ]);
 
@@ -27,7 +47,7 @@ const Board = () => {
         const tokensInCell = tokens.filter(
           (token) => token.x === row && token.y === col
         );
-
+        
         cells.push(
           <Cell
             key={`${row}-${col}`}

@@ -4,11 +4,10 @@ import { View, StyleSheet } from "react-native";
 interface CellProps {
   size: number;
   position: { x: number; y: number };
-  tokens?: { color: string; size: number }[]; // Array of tokens in the cell
-  children?: React.ReactNode;
+  tokens?: { color: string; size: number }[];
 }
 
-const Cell: React.FC<CellProps> = ({size, position, tokens, children}) => {
+const Cell: React.FC<CellProps> = ({size, position, tokens}) => {
   const getCellColor = () => {
     const yellow = "#FFFF05"; // Yellow home
     const blue = "#0A07D9"; // Blue home
@@ -61,8 +60,8 @@ const Cell: React.FC<CellProps> = ({size, position, tokens, children}) => {
   
 
 
+  
   const renderTokenHolders = () => {
-    // Token holder placement logic
     const isTokenHolder = (x: number, y: number) =>
       (x === 1 && y === 1) ||
       (x === 1 && y === 4) ||
@@ -74,7 +73,6 @@ const Cell: React.FC<CellProps> = ({size, position, tokens, children}) => {
     const isRedHome = position.x < 6 && position.y > 8;
     const isGreenHome = position.x < 6 && position.y < 6;
 
-    // Adjust the positions for token holders within each home
     if (
       (isYellowHome && isTokenHolder(position.x - 9, position.y - 9)) ||
       (isBlueHome && isTokenHolder(position.x - 9, position.y)) ||
@@ -86,15 +84,14 @@ const Cell: React.FC<CellProps> = ({size, position, tokens, children}) => {
           style={[
             styles.tokenHolder,
             {
-              width: size * 1.0,
-              height: size * 1.0,
-              borderRadius: size * 0.3,
+              width: size * 0.8,
+              height: size * 0.8,
+              borderRadius: size * 0.4,
             },
           ]}
         />
       );
     }
-
     return null;
   };
 
@@ -110,16 +107,16 @@ const Cell: React.FC<CellProps> = ({size, position, tokens, children}) => {
             backgroundColor: token.color,
             width: token.size,
             height: token.size,
+            borderRadius: token.size / 2,
             position: "absolute",
-            top: size / 4,
-            left: size / 4,
+            top: (size - token.size) / 2,
+            left: (size - token.size) / 2,
           },
         ]}
       />
     ));
   };
 
-
   return (
     <View
       style={[
@@ -132,35 +129,32 @@ const Cell: React.FC<CellProps> = ({size, position, tokens, children}) => {
       ]}
     >
       {renderTokenHolders()}
-    </View>
-  );
-  return (
-    <View
-      style={[
-        styles.cell,
-        {
-          width: size,
-          height: size,
-          backgroundColor: getCellColor(),
-        },
-      ]}
-    >
-      {renderTokenHolders()}
-      {children} {/* This will render the tokens */}
+      {renderTokens()}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-    cell: {
-      borderWidth: 0.5,
-      borderColor: "#000",
-    },
-    tokenHolder: {
-      backgroundColor: "#FFFFFF", // White token holders
-      justifyContent: "center",
-      alignItems: "center",
-      alignSelf: "center",
-    },
-  });
+  cell: {
+    borderWidth: 0.5,
+    borderColor: "#000",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  tokenHolder: {
+    backgroundColor: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "#000",
+  },
+  token: {
+    borderWidth: 2,
+    borderColor: "#000",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+});
+
 export default Cell;
