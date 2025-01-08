@@ -38,7 +38,7 @@ const DiceRoller: React.FC<DiceRollerProps> = ({
       if (count >= intervals) {
         clearInterval(roll);
         setIsRolling(false);
-        onRoll(newValue);
+        onRoll(newValue); // Call the onRoll function with the final value
       }
     }, duration / intervals);
   };
