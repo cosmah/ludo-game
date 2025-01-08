@@ -73,80 +73,111 @@ const Board = () => {
       canRoll: false,
     }));
 
-    const possibleMoves = checkPossibleMoves(value);
-    
-    if (!possibleMoves) {
-      setTimeout(nextTurn, 1500);
+    if (value === 6) {
+      moveTokenFromHouseToExit();
     } else {
-      // If moves are possible (implement move logic here if needed)
-      console.log("Possible moves available");
-      // You may want to implement logic for moving tokens based on the rolled value.
-      // For now we will just wait for the next turn.
-      setTimeout(nextTurn,1500);
+      const possibleMoves = checkPossibleMoves(value);
+      
+      if (!possibleMoves) {
+        setTimeout(nextTurn, 1500);
+      } else {
+        console.log("Possible moves available");
+        setTimeout(nextTurn, 1500);
+      }
     }
-   };
+  };
 
-   const checkPossibleMoves = (diceValue:number):boolean => {
-     const currentHouseTokens = tokens.filter(
-       token => token.houseIndex === gameState.currentTurn
-     );
-     // Placeholder logic for checking possible moves
-     return currentHouseTokens.length > 0; // Example condition
-   };
+  const moveTokenFromHouseToExit = () => {
+    setTokens(prevTokens => {
+      const newTokens = [...prevTokens];
+      const houseTokens = newTokens.filter(token => token.houseIndex === gameState.currentTurn);
+      if (houseTokens.length > 0) {
+        const tokenToMove = houseTokens[0];
+        switch (gameState.currentTurn) {
+          case House.GREEN:
+            tokenToMove.x = 6;
+            tokenToMove.y = 1;
+            break;
+          case House.RED:
+            tokenToMove.x = 1;
+            tokenToMove.y = 8;
+            break;
+          case House.BLUE:
+            tokenToMove.x = 13;
+            tokenToMove.y = 6;
+            break;
+          case House.YELLOW:
+            tokenToMove.x = 8;
+            tokenToMove.y = 13;
+            break;
+        }
+      }
+      return newTokens;
+    });
+    setTimeout(nextTurn, 1500);
+  };
 
-   const nextTurn = () => {
-     setGameState(prev => ({
-       currentTurn: (prev.currentTurn + 1) % 4, // There are 4 houses
-       canRoll: true,
-       lastRoll: null,
-     }));
-     console.log(`Next turn for ${House[(gameState.currentTurn + 1) % 4]}`);
-   };
+  const checkPossibleMoves = (diceValue:number):boolean => {
+    const currentHouseTokens = tokens.filter(
+      token => token.houseIndex === gameState.currentTurn
+    );
+    // Placeholder logic for checking possible moves
+    return currentHouseTokens.length > 0; // Example condition
+  };
 
-   const renderCells = () => {
-     const cells = [];
-     for (let row =0; row <15; row++) {
-       for (let col=0; col<15; col++) {
-         const tokensInCell = tokens.filter(
-           token => token.x === row && token.y === col
-         );
-         cells.push(
-           <Cell
-             key={`${row}-${col}`}
-             size={CELL_SIZE}
-             position={{x :row ,y :col}}
-             tokens={tokensInCell.map(token => ({
-               color :token.color,
-               size :CELL_SIZE *0.6,
-             }))}
-           />
-         );
-       }
-     }
-     return cells;
-   };
+  const nextTurn = () => {
+    setGameState(prev => ({
+      currentTurn: (prev.currentTurn + 1) % 4, // There are 4 houses
+      canRoll: true,
+      lastRoll: null,
+    }));
+    console.log(`Next turn for ${House[(gameState.currentTurn + 1) % 4]}`);
+  };
 
-   return (
-     <View style={styles.container}>
-       <View style={styles.gameInfo}>
-         <Text style={[styles.turnIndicator,{color :HOUSE_COLORS[gameState.currentTurn]}]}>
-           {House[gameState.currentTurn]}'s Turn
-         </Text>
-         {gameState.lastRoll && (
-           <Text style={styles.rollValue}>Rolled :{gameState.lastRoll}</Text>
-         )}
-       </View>
+  const renderCells = () => {
+    const cells = [];
+    for (let row =0; row <15; row++) {
+      for (let col=0; col<15; col++) {
+        const tokensInCell = tokens.filter(
+          token => token.x === row && token.y === col
+        );
+        cells.push(
+          <Cell
+            key={`${row}-${col}`}
+            size={CELL_SIZE}
+            position={{x :row ,y :col}}
+            tokens={tokensInCell.map(token => ({
+              color :token.color,
+              size :CELL_SIZE *0.6,
+            }))}
+          />
+        );
+      }
+    }
+    return cells;
+  };
 
-       <View style={styles.board}>{renderCells()}</View>
+  return (
+    <View style={styles.container}>
+      <View style={styles.gameInfo}>
+        <Text style={[styles.turnIndicator,{color :HOUSE_COLORS[gameState.currentTurn]}]}>
+          {House[gameState.currentTurn]}'s Turn
+        </Text>
+        {gameState.lastRoll && (
+          <Text style={styles.rollValue}>Rolled :{gameState.lastRoll}</Text>
+        )}
+      </View>
 
-       <View style={styles.diceArea}>
-         <DiceRoller
-           onRoll={handleDiceRoll}
-           disabled={!gameState.canRoll}
-         />
-       </View>
-     </View>
-   );
+      <View style={styles.board}>{renderCells()}</View>
+
+      <View style={styles.diceArea}>
+        <DiceRoller
+          onRoll={handleDiceRoll}
+          disabled={!gameState.canRoll}
+        />
+      </View>
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
