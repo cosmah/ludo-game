@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 import { View, Image, TouchableOpacity, StyleSheet } from 'react-native';
 
-const DiceRoller = () => {
+interface DiceRollerProps {
+  onRoll: (value: number) => void;
+  disabled?: boolean;
+}
+
+const DiceRoller: React.FC<DiceRollerProps> = ({ 
+  onRoll = (value: number) => console.log(value),
+  disabled 
+}) => {
   const [currentValue, setCurrentValue] = useState(1);
   const [isRolling, setIsRolling] = useState(false);
 
@@ -15,26 +23,32 @@ const DiceRoller = () => {
   };
 
   const rollDice = () => {
-    if (isRolling) return;
+    if (isRolling || disabled) return;
     
     setIsRolling(true);
     const duration = 750;
     const intervals = 10;
     let count = 0;
-    
+
     const roll = setInterval(() => {
-      setCurrentValue(Math.floor(Math.random() * 6) + 1);
+      const newValue = Math.floor(Math.random() * 6) + 1;
+      setCurrentValue(newValue);
       count++;
       
       if (count >= intervals) {
         clearInterval(roll);
         setIsRolling(false);
+        onRoll(newValue);
       }
     }, duration / intervals);
   };
 
   return (
-    <TouchableOpacity onPress={rollDice} disabled={isRolling}>
+    <TouchableOpacity 
+      onPress={rollDice}
+      disabled={isRolling || disabled}
+      style={[styles.container, (disabled || isRolling) && styles.disabled]}
+    >
       <View style={styles.diceContainer}>
         <Image
           source={diceImages[currentValue]}
@@ -47,6 +61,12 @@ const DiceRoller = () => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    opacity: 1,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
   diceContainer: {
     padding: 20,
     alignItems: 'center',
