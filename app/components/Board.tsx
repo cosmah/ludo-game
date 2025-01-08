@@ -81,7 +81,7 @@ const Board = () => {
       if (!possibleMoves) {
         setTimeout(nextTurn, 1500);
       } else {
-        console.log("Possible moves available");
+        moveTokenForward(value);
         setTimeout(nextTurn, 1500);
       }
     }
@@ -115,6 +115,65 @@ const Board = () => {
       return newTokens;
     });
     setTimeout(nextTurn, 1500);
+  };
+
+  const moveTokenForward = (steps: number) => {
+    setTokens(prevTokens => {
+      const newTokens = [...prevTokens];
+      const currentHouseTokens = newTokens.filter(token => token.houseIndex === gameState.currentTurn && !isTokenInHouse(token));
+      if (currentHouseTokens.length > 0) {
+        const tokenToMove = currentHouseTokens[0];
+        for (let i = 0; i < steps; i++) {
+          moveTokenOneStep(tokenToMove);
+        }
+      }
+      return newTokens;
+    });
+  };
+
+  const isTokenInHouse = (token: TokenPosition) => {
+    switch (token.houseIndex) {
+      case House.GREEN:
+        return token.x < 6 && token.y < 6;
+      case House.RED:
+        return token.x < 6 && token.y > 8;
+      case House.BLUE:
+        return token.x > 8 && token.y < 6;
+      case House.YELLOW:
+        return token.x > 8 && token.y > 8;
+      default:
+        return false;
+    }
+  };
+
+  const moveTokenOneStep = (token: TokenPosition) => {
+    // Logic to move the token one step forward based on the current position and house
+    // This is a placeholder logic and should be replaced with the actual movement logic
+    if (token.houseIndex === House.GREEN) {
+      if (token.x === 6 && token.y < 7) {
+        token.y += 1;
+      } else if (token.y === 7 && token.x > 0) {
+        token.x -= 1;
+      }
+    } else if (token.houseIndex === House.RED) {
+      if (token.y === 8 && token.x < 7) {
+        token.x += 1;
+      } else if (token.x === 7 && token.y < 14) {
+        token.y += 1;
+      }
+    } else if (token.houseIndex === House.BLUE) {
+      if (token.x === 13 && token.y < 7) {
+        token.y += 1;
+      } else if (token.y === 7 && token.x < 14) {
+        token.x += 1;
+      }
+    } else if (token.houseIndex === House.YELLOW) {
+      if (token.y === 13 && token.x > 7) {
+        token.x -= 1;
+      } else if (token.x === 8 && token.y > 7) {
+        token.y -= 1;
+      }
+    }
   };
 
   const checkPossibleMoves = (diceValue:number):boolean => {
