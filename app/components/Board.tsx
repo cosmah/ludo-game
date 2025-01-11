@@ -2,60 +2,35 @@ import React, { useState } from "react";
 import { View, Text, Dimensions, StyleSheet } from "react-native";
 import Cell from "./Cell";
 import DiceRoller from "./Dice";
+import { House, TokenPosition, GameState, HOUSE_COLORS } from '../types/gameTypes';
+import { moveTokenForward, isTokenInHouse } from '../utils/gameUtils';
 
 const { width } = Dimensions.get("window");
 const BOARD_SIZE = width * 0.9;
 const CELL_SIZE = BOARD_SIZE / 15.31;
 
-enum House {
-  BLUE = 0,
-  GREEN = 1,
-  RED = 2,
-  YELLOW = 3,
-}
-
-interface TokenPosition {
-  x: number;
-  y: number;
-  color: string;
-  houseIndex: House;
-}
-
-interface GameState {
-  currentTurn: House;
-  canRoll: boolean;
-  lastRoll: number | null;
-}
-
-const HOUSE_COLORS = {
-  [House.BLUE]: "#0A07D9",
-  [House.GREEN]: "#4AD61C",
-  [House.RED]: "#E30E0E",
-  [House.YELLOW]: "#FFFF05",
-};
-
 const Board = () => {
   const [tokens, setTokens] = useState<TokenPosition[]>([
     // Green tokens (top-left)
-    { x: 1, y: 1, color: "#4AD61C", houseIndex: House.GREEN },
-    { x: 1, y: 4, color: "#4AD61C", houseIndex: House.GREEN },
-    { x: 4, y: 1, color: "#4AD61C", houseIndex: House.GREEN },
-    { x: 4, y: 4, color: "#4AD61C", houseIndex: House.GREEN },
+    { x: 1, y: 1, color: HOUSE_COLORS[House.GREEN], houseIndex: House.GREEN },
+    { x: 1, y: 4, color: HOUSE_COLORS[House.GREEN], houseIndex: House.GREEN },
+    { x: 4, y: 1, color: HOUSE_COLORS[House.GREEN], houseIndex: House.GREEN },
+    { x: 4, y: 4, color: HOUSE_COLORS[House.GREEN], houseIndex: House.GREEN },
     // Red tokens (bottom-left)
-    { x: 1, y: 10, color: "#E30E0E", houseIndex: House.RED },
-    { x: 1, y: 13, color: "#E30E0E", houseIndex: House.RED },
-    { x: 4, y: 10, color: "#E30E0E", houseIndex: House.RED },
-    { x: 4, y: 13, color: "#E30E0E", houseIndex: House.RED },
+    { x: 1, y: 10, color: HOUSE_COLORS[House.RED], houseIndex: House.RED },
+    { x: 1, y: 13, color: HOUSE_COLORS[House.RED], houseIndex: House.RED },
+    { x: 4, y: 10, color: HOUSE_COLORS[House.RED], houseIndex: House.RED },
+    { x: 4, y: 13, color: HOUSE_COLORS[House.RED], houseIndex: House.RED },
     // Blue tokens (top-right)
-    { x: 10, y: 1, color: "#0A07D9", houseIndex: House.BLUE },
-    { x: 10, y: 4, color: "#0A07D9", houseIndex: House.BLUE },
-    { x: 13, y: 1, color: "#0A07D9", houseIndex: House.BLUE },
-    { x: 13, y: 4, color: "#0A07D9", houseIndex: House.BLUE },
+    { x: 10, y: 1, color: HOUSE_COLORS[House.BLUE], houseIndex: House.BLUE },
+    { x: 10, y: 4, color: HOUSE_COLORS[House.BLUE], houseIndex: House.BLUE },
+    { x: 13, y: 1, color: HOUSE_COLORS[House.BLUE], houseIndex: House.BLUE },
+    { x: 13, y: 4, color: HOUSE_COLORS[House.BLUE], houseIndex: House.BLUE },
     // Yellow tokens (bottom-right)
-    { x: 10, y: 10, color: "#FFFF05", houseIndex: House.YELLOW },
-    { x: 10, y: 13, color: "#FFFF05", houseIndex: House.YELLOW },
-    { x: 13, y: 10, color: "#FFFF05", houseIndex: House.YELLOW },
-    { x: 13, y: 13, color: "#FFFF05", houseIndex: House.YELLOW },
+    { x: 10, y: 10, color: HOUSE_COLORS[House.YELLOW], houseIndex: House.YELLOW },
+    { x: 10, y: 13, color: HOUSE_COLORS[House.YELLOW], houseIndex: House.YELLOW },
+    { x: 13, y: 10, color: HOUSE_COLORS[House.YELLOW], houseIndex: House.YELLOW },
+    { x: 13, y: 13, color: HOUSE_COLORS[House.YELLOW], houseIndex: House.YELLOW },
   ]);
 
   const [gameState, setGameState] = useState<GameState>({
@@ -73,130 +48,73 @@ const Board = () => {
       canRoll: false,
     }));
 
-    if (value === 6) {
-      moveTokenFromHouseToExit();
+    const possibleMoves = checkPossibleMoves(value);
+    
+    if (!possibleMoves) {
+      setTimeout(nextTurn, 1500);
     } else {
-      const possibleMoves = checkPossibleMoves(value);
+      handleTokenMovement(value);
+      setTimeout(nextTurn, 1500);
+    }
+  };
+
+  const handleTokenMovement = (steps: number) => {
+    setTokens(prevTokens => {
+      const newTokens = [...prevTokens];
+      const currentHouseTokens = newTokens.filter(
+        token => token.houseIndex === gameState.currentTurn
+      );
+
+      // Try to move a token that's already on the path first
+      const activeToken = currentHouseTokens.find(token => !isTokenInHouse(token));
       
-      if (!possibleMoves) {
-        setTimeout(nextTurn, 1500);
-      } else {
-        moveTokenForward(value);
-        setTimeout(nextTurn, 1500);
-      }
-    }
-  };
-
-  const moveTokenFromHouseToExit = () => {
-    setTokens(prevTokens => {
-      const newTokens = [...prevTokens];
-      const houseTokens = newTokens.filter(token => token.houseIndex === gameState.currentTurn);
-      if (houseTokens.length > 0) {
-        const tokenToMove = houseTokens[0];
-        switch (gameState.currentTurn) {
-          case House.GREEN:
-            tokenToMove.x = 6;
-            tokenToMove.y = 1;
-            break;
-          case House.RED:
-            tokenToMove.x = 1;
-            tokenToMove.y = 8;
-            break;
-          case House.BLUE:
-            tokenToMove.x = 13;
-            tokenToMove.y = 6;
-            break;
-          case House.YELLOW:
-            tokenToMove.x = 8;
-            tokenToMove.y = 13;
-            break;
+      if (activeToken) {
+        moveTokenForward(activeToken, steps);
+      } else if (steps === 6) {
+        // If rolled a 6 and all tokens are in house, move one out
+        const houseToken = currentHouseTokens.find(token => isTokenInHouse(token));
+        if (houseToken) {
+          moveTokenForward(houseToken, steps);
         }
       }
-      return newTokens;
-    });
-    setTimeout(nextTurn, 1500);
-  };
 
-  const moveTokenForward = (steps: number) => {
-    setTokens(prevTokens => {
-      const newTokens = [...prevTokens];
-      const currentHouseTokens = newTokens.filter(token => token.houseIndex === gameState.currentTurn && !isTokenInHouse(token));
-      if (currentHouseTokens.length > 0) {
-        const tokenToMove = currentHouseTokens[0];
-        for (let i = 0; i < steps; i++) {
-          moveTokenOneStep(tokenToMove);
-        }
-      }
       return newTokens;
     });
   };
 
-  const isTokenInHouse = (token: TokenPosition) => {
-    switch (token.houseIndex) {
-      case House.GREEN:
-        return token.x < 6 && token.y < 6;
-      case House.RED:
-        return token.x < 6 && token.y > 8;
-      case House.BLUE:
-        return token.x > 8 && token.y < 6;
-      case House.YELLOW:
-        return token.x > 8 && token.y > 8;
-      default:
-        return false;
-    }
-  };
-
-  const moveTokenOneStep = (token: TokenPosition) => {
-    // Logic to move the token one step forward based on the current position and house
-    // This is a placeholder logic and should be replaced with the actual movement logic
-    if (token.houseIndex === House.GREEN) {
-      if (token.x === 6 && token.y < 7) {
-        token.y += 1;
-      } else if (token.y === 7 && token.x > 0) {
-        token.x -= 1;
-      }
-    } else if (token.houseIndex === House.RED) {
-      if (token.y === 8 && token.x < 7) {
-        token.x += 1;
-      } else if (token.x === 7 && token.y < 14) {
-        token.y += 1;
-      }
-    } else if (token.houseIndex === House.BLUE) {
-      if (token.x === 13 && token.y < 7) {
-        token.y += 1;
-      } else if (token.y === 7 && token.x < 14) {
-        token.x += 1;
-      }
-    } else if (token.houseIndex === House.YELLOW) {
-      if (token.y === 13 && token.x > 7) {
-        token.x -= 1;
-      } else if (token.x === 8 && token.y > 7) {
-        token.y -= 1;
-      }
-    }
-  };
-
-  const checkPossibleMoves = (diceValue:number):boolean => {
+  const checkPossibleMoves = (diceValue: number): boolean => {
     const currentHouseTokens = tokens.filter(
       token => token.houseIndex === gameState.currentTurn
     );
-    // Placeholder logic for checking possible moves
-    return currentHouseTokens.length > 0; // Example condition
+
+    // Check if any token is already on the path
+    const hasTokenOnPath = currentHouseTokens.some(token => !isTokenInHouse(token));
+    
+    // If rolled 6, can always move if there's a token in house
+    if (diceValue === 6 && currentHouseTokens.some(token => isTokenInHouse(token))) {
+      return true;
+    }
+
+    // If has token on path, can always move
+    if (hasTokenOnPath) {
+      return true;
+    }
+
+    return false;
   };
 
   const nextTurn = () => {
     setGameState(prev => ({
-      currentTurn: (prev.currentTurn + 1) % 4, // There are 4 houses
+      currentTurn: (prev.currentTurn + 1) % 4,
       canRoll: true,
       lastRoll: null,
     }));
-    console.log(`Next turn for ${House[(gameState.currentTurn + 1) % 4]}`);
   };
 
   const renderCells = () => {
     const cells = [];
-    for (let row =0; row <15; row++) {
-      for (let col=0; col<15; col++) {
+    for (let row = 0; row < 15; row++) {
+      for (let col = 0; col < 15; col++) {
         const tokensInCell = tokens.filter(
           token => token.x === row && token.y === col
         );
@@ -204,10 +122,10 @@ const Board = () => {
           <Cell
             key={`${row}-${col}`}
             size={CELL_SIZE}
-            position={{x :row ,y :col}}
+            position={{ x: row, y: col }}
             tokens={tokensInCell.map(token => ({
-              color :token.color,
-              size :CELL_SIZE *0.6,
+              color: token.color,
+              size: CELL_SIZE * 0.6,
             }))}
           />
         );
@@ -219,11 +137,11 @@ const Board = () => {
   return (
     <View style={styles.container}>
       <View style={styles.gameInfo}>
-        <Text style={[styles.turnIndicator,{color :HOUSE_COLORS[gameState.currentTurn]}]}>
+        <Text style={[styles.turnIndicator, { color: HOUSE_COLORS[gameState.currentTurn] }]}>
           {House[gameState.currentTurn]}'s Turn
         </Text>
         {gameState.lastRoll && (
-          <Text style={styles.rollValue}>Rolled :{gameState.lastRoll}</Text>
+          <Text style={styles.rollValue}>Rolled: {gameState.lastRoll}</Text>
         )}
       </View>
 
@@ -240,39 +158,39 @@ const Board = () => {
 };
 
 const styles = StyleSheet.create({
- container:{
-   flex :1,
-   alignItems:"center",
-   justifyContent:"center",
-   padding :16,
- },
- board:{
-   width :BOARD_SIZE,
-   height :BOARD_SIZE,
-   backgroundColor:"#FFFFFF",
-   flexDirection:"row",
-   flexWrap:"wrap",
-   borderWidth :3,
-   borderColor:"#000",
-   borderRadius :10,
- },
- gameInfo:{
-   alignItems:"center",
-   marginBottom :16,
- },
- turnIndicator:{
-   fontSize :24,
-   fontWeight :"bold",
-   marginBottom :8,
- },
- rollValue:{
-   fontSize :18,
-   fontWeight :"500",
- },
- diceArea:{
-   marginTop :16,
-   alignItems :"center",
- },
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+  },
+  board: {
+    width: BOARD_SIZE,
+    height: BOARD_SIZE,
+    backgroundColor: "#FFFFFF",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    borderWidth: 3,
+    borderColor: "#000",
+    borderRadius: 10,
+  },
+  gameInfo: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  turnIndicator: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  rollValue: {
+    fontSize: 18,
+    fontWeight: "500",
+  },
+  diceArea: {
+    marginTop: 16,
+    alignItems: "center",
+  },
 });
 
 export default Board;
